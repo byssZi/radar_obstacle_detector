@@ -1,0 +1,13 @@
+<launch>
+
+  <node pkg="radar_obstacle_detector" type="radar_obstacle_detector_node" name="dbscan" output="screen">
+    <!-- Input Topic Names -->
+    <param name="radar_points_topic"                  value="/carla/ego_vehicle/radar_front"/>
+    <param name="radar_cluster_topic"                 value="/ars_40X/combined_clusters"/>
+    <!-- Output Topic Names -->
+    <param name="visualize_radar_topic"               value="obstacle_detector/radar_clusters"/>
+    <param name="dbscan_bbox_topic"                   value="/ars_40X/combined_objects"/>
+    <param name="cluster_output_topic"                value="obstacle_detector/radar_pointcloud"/>
+  </node>
+
+</launch>
