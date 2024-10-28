@@ -1,5 +1,5 @@
-#include "dbscan.h"
-#include "cluster.h"
+#include "radar_obstacle_detector/dbscan.h"
+#include "radar_obstacle_detector/cluster.h"
 
 #include <algorithm>
 #include <stdexcept>

@@ -1,4 +1,4 @@
-#include "point.h"
+#include "radar_obstacle_detector/point.h"
 
 namespace dbscan {
 

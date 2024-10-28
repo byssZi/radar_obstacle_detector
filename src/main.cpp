@@ -1,4 +1,4 @@
-#include "radar_pointcloud_subscriber.h"
+#include "radar_obstacle_detector/radar_pointcloud_subscriber.h"
 #include <ros/ros.h>
 
 int main(int argc, char** argv)

@@ -134,7 +134,7 @@ catkin_package(
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
 include_directories(
-  ${CMAKE_SOURCE_DIR}/src
+  include ${CMAKE_SOURCE_DIR}/include/radar_obstacle_detector
   ${catkin_INCLUDE_DIRS}
   ${EIGEN3_INCLUDE_DIRS}
   ${PCL_INCLUDE_DIRS}
@@ -157,7 +157,6 @@ add_executable(radar_obstacle_detector_node
                   src/dbscan.cpp
                   src/GPF.cpp
                   src/kdtree.cpp
-                  src/nanoflann.hpp
                   src/point.cpp)
 target_link_libraries(radar_obstacle_detector_node  ${catkin_LIBRARIES} ${PCL_LIBRARIES})
 add_dependencies(radar_obstacle_detector_node  ${PROJECT_NAME}_generate_messages_cpp)
