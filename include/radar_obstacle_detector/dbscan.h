@@ -5,7 +5,6 @@
 
 #include <vector>
 #include <tuple>
-#include "cluster.h"
 
 
 namespace dbscan {

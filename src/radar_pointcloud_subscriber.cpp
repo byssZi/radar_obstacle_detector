@@ -2,20 +2,21 @@
 
 // 构造函数，初始化订阅者和 DBSCAN 参数
 RadarPointCloudSubscriber::RadarPointCloudSubscriber()
-    : min_points(6), epsilon(1) // 初始化 DBSCAN 参数
+    : min_points(5), epsilon(1.5), max_frames(5) // 初始化 DBSCAN 参数
 {
-    ros::NodeHandle private_nh("~");
     // 订阅毫米波雷达的点云话题
     std::string radar_points_topic;
     std::string radar_cluster_topic;
     std::string visualize_radar_topic;
     std::string dbscan_bbox_topic;
     std::string cluster_output_topic;
-    ROS_ASSERT(private_nh.getParam("radar_points_topic", radar_points_topic));
-    ROS_ASSERT(private_nh.getParam("radar_cluster_topic", radar_cluster_topic));
-    ROS_ASSERT(private_nh.getParam("visualize_radar_topic", visualize_radar_topic));
-    ROS_ASSERT(private_nh.getParam("dbscan_bbox_topic", dbscan_bbox_topic));
-    ROS_ASSERT(private_nh.getParam("cluster_output_topic", cluster_output_topic));
+    ros::NodeHandle private_nh("~"); // 使用私有 NodeHandle
+
+    private_nh.param("radar_points_topic", radar_points_topic, std::string("/carla/ego_vehicle/radar_front"));
+    private_nh.param("radar_cluster_topic", radar_cluster_topic, std::string("/radar/clusters"));
+    private_nh.param("visualize_radar_topic", visualize_radar_topic, std::string("/radar/visualization"));
+    private_nh.param("dbscan_bbox_topic", dbscan_bbox_topic, std::string("/radar/dbscan_bbox"));
+    private_nh.param("cluster_output_topic", cluster_output_topic, std::string("/radar/cluster_output"));
     pointcloud_sub_ = nh.subscribe(radar_points_topic, 1, &RadarPointCloudSubscriber::radarPointCloudCallback, this);
     cluster_sub_ = nh.subscribe(radar_cluster_topic, 1, &RadarPointCloudSubscriber::radarClusterCallback, this);
     cluster_view_ = nh.advertise<visualization_msgs::MarkerArray>(visualize_radar_topic, 1);
@@ -51,11 +52,25 @@ void RadarPointCloudSubscriber::radarPointCloudCallback(const sensor_msgs::Point
         float velocity = *iter_velocity;
         float azimuth = *iter_azimuth;
         float elevation = *iter_elevation;
+
         points.push_back(dbscan::Point(x, y, z, velocity, azimuth, elevation, range));  // 转换为 dbscan::Point 类型并存入 points 向量
 
     }
+      // 将当前帧的点云数据添加到循环队列中
+    point_cloud_frames.push_back(points);
+
+        // 如果循环队列中的帧数超过最大帧数，则移除最早的一帧
+    if (point_cloud_frames.size() > max_frames) {
+        point_cloud_frames.pop_front();
+    }
+
+    // 聚合所有帧的点云数据
+    std::vector<dbscan::Point> aggregated_points;
+    for (const auto& frame : point_cloud_frames) {
+        aggregated_points.insert(aggregated_points.end(), frame.begin(), frame.end());
+    }
         // 使用 DBSCAN 算法进行聚类
-    clusters = kdtree::cluster_points(points, epsilon, min_points);
+    clusters = kdtree::cluster_points(aggregated_points, epsilon, min_points);
 
     visualization_msgs::MarkerArray marker_bboxs;
     radar_obstacle_detector::ObjectList dbscan_bboxs;
@@ -77,8 +92,8 @@ void RadarPointCloudSubscriber::radarPointCloudCallback(const sensor_msgs::Point
     pcl::toROSMsg(*(cluster_pub), *obstacle_cloud);
     obstacle_cloud->header = cloud_msg->header;
     cluster_pub_.publish(obstacle_cloud);
+    tracker.obstacleTracking(prev_boxes_, curr_boxes_, 2.0, 0.5);
 
-    tracker.obstacleTracking(prev_boxes_, curr_boxes_, 1.0, 1.0);
     for (auto box : curr_boxes_) {
             // Check if the box dimensions and center are valid before proceeding
         radar_obstacle_detector::Object object_bbox;

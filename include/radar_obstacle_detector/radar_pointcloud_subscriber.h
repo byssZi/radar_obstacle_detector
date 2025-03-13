@@ -12,9 +12,9 @@
 #include <visualization_msgs/MarkerArray.h>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
 #include <pcl/io/pcd_io.h>
-#include "GPF.h"
 #include "point.h"
 #include "dbscan.h"
+#include "obstacletracker.h"
 #include "cluster.h"
 #include "kdtree.h"
 #include <chrono>
@@ -42,12 +42,12 @@ private:
 
     // DBSCAN 相关变量
     std::vector<dbscan::Point> points;
-    int min_points;
+    int min_points, max_frames;
     double epsilon;
+    std::deque<std::vector<dbscan::Point>> point_cloud_frames;
     std::vector<dbscan::Cluster> clusters;
     std::vector<dbscan::Cluster::BoundingBox> prev_boxes_, curr_boxes_;
     dbscan::ObstacleTracker tracker;
-
 };
 
 #endif  // RADAR_POINTCLOUD_SUBSCRIBER_H

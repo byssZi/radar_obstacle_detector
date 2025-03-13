@@ -6,7 +6,7 @@ Point::Point(double x, double y, double z, double magnitude, double azimuth, dou
     : x_(x), y_(y), z_(z), magnitude_(magnitude), azimuth_(azimuth), elevation_(elevation), rcs_(rcs), state(PointState::unclassified) {}
 
 double Point::EuclideanDistance(Point const& p) const {
-    return std::pow(std::pow(x() - p.x(), 2) + std::pow(y() - p.y(), 2) + std::pow(z() - p.z(), 2), 0.5);
+    return std::pow(std::pow(x() - p.x(), 2) + std::pow(y() - p.y(), 2) + std::pow(z() - p.z(), 2) + std::pow(p.magnitude() - p.magnitude(), 2), 0.5);
 }
 
 bool Point::IsClassified() const {

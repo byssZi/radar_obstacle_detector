@@ -153,9 +153,10 @@ add_definitions(${PCL_DEFINITIONS})
 add_executable(radar_obstacle_detector_node 
                   src/main.cpp
                   src/radar_pointcloud_subscriber.cpp
+                  src/ukf.cpp
                   src/cluster.cpp
                   src/dbscan.cpp
-                  src/GPF.cpp
+                  src/obstacletracker.cpp
                   src/kdtree.cpp
                   src/point.cpp)
 target_link_libraries(radar_obstacle_detector_node  ${catkin_LIBRARIES} ${PCL_LIBRARIES})
